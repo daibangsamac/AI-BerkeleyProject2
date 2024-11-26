@@ -152,7 +152,52 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns whether or not the game state is a losing state
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        def DFMiniMax(gameState, agentIndex, depth=0):
+            legalActionList = gameState.getLegalActions(agentIndex)
+            numIndex = gameState.getNumAgents() - 1
+            bestAction = None
+
+            # If n is TERMINAL
+            if (gameState.isLose() or gameState.isWin() or (depth == self.depth)):
+                return [self.evaluationFunction(gameState)]
+            elif agentIndex == numIndex:
+                depth += 1
+                childAgentIndex = self.index
+            else:
+                childAgentIndex = agentIndex + 1
+            # If Agent == MIN aka ghost
+            if agentIndex != 0:
+                min = float("inf")
+                for legalAction in legalActionList:
+                    successorGameState = gameState.generateSuccessor(agentIndex, legalAction)
+                    newMin = DFMiniMax(successorGameState, childAgentIndex, depth)[0]
+                    if newMin == min:
+                        if bool(random.getrandbits(1)):
+                            bestAction = legalAction
+                    #return minimum of DFMiniMax(c, MAX) over c in ChildList
+                    elif newMin < min:
+                        min = newMin
+                        bestAction = legalAction
+                return min, bestAction
+            # Agent is MAX aka Pacman
+            else:
+                max = -float("inf")
+                for legalAction in legalActionList:
+                    successorGameState = gameState.generateSuccessor(agentIndex, legalAction)
+                    newMax = DFMiniMax(successorGameState, childAgentIndex, depth)[0]
+                    if newMax == max:
+                        if bool(random.getrandbits(1)):
+                            bestAction = legalAction
+                    #return maximum of DFMiniMax(c, MIN) over c in ChildList
+                    elif newMax > max:
+                        max = newMax
+                        bestAction = legalAction
+            return max, bestAction
+
+        bestScoreActionPair = DFMiniMax(gameState, self.index)
+        # bestScore = bestScoreActionPair[0]
+        bestMove =  bestScoreActionPair[1]
+        return bestMove
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
