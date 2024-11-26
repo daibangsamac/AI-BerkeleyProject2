@@ -209,7 +209,64 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        def alpha_beta(state, depth, agent, A, B):
+
+            # If we found the bottom nodes or we don't have any moves or we won or lost: Call evaluation function and return the result
+            if depth == self.depth or state.getLegalActions(agent) == 0 or state.isWin() or state.isLose():
+                return (self.evaluationFunction(state), None)
+
+            minfinity = float("-inf")
+            val = minfinity
+            # If agent is pacman
+            if (agent == 0):
+                for a in state.getLegalActions(agent):
+                    (v1, a1) = alpha_beta(state.generateSuccessor(agent, a), depth, (agent + 1) % state.getNumAgents(),
+                                          A, B)
+
+                    # Find the maximum value
+                    if (v1 > val):
+                        val = v1
+                        maxa = a
+
+                    if val > B:
+                        return (val, maxa)
+                    A = max(A, val)
+
+                    # Return the value and the action from which we found max
+            if val is not minfinity:
+                return (val, maxa)
+
+            infinity = float("inf")
+            val = infinity
+            # If agent is ghost
+            if (agent != 0):
+                for a in state.getLegalActions(agent):
+                    # If it isn't the last ghost keep the same depth
+                    if (((agent + 1) % state.getNumAgents()) != 0):
+                        (v1, a1) = alpha_beta(state.generateSuccessor(agent, a), depth,
+                                              (agent + 1) % state.getNumAgents(), A, B)
+                    # else if it is next_depth = depth + 1
+                    else:
+                        (v1, a1) = alpha_beta(state.generateSuccessor(agent, a), depth + 1,
+                                              (agent + 1) % state.getNumAgents(), A, B)
+
+                    # Find the minimum value
+                    if (v1 < val):
+                        val = v1
+                        mina = a
+
+                    if val < A:
+                        return (val, mina)
+                    B = min(B, val)
+
+            # Return the value and the action from which we found min
+            if val != infinity:
+                return (val, mina)
+        bestScoreActionPair = alpha_beta(gameState,0, self.index, -9999999, 9999999)
+        bestScore = bestScoreActionPair[0]
+        bestMove =  bestScoreActionPair[1]
+        return bestMove
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
